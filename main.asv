@@ -64,9 +64,9 @@ for t=1:n
         [Tension] = cableTension(RESTING_CABLE_LENGTH, M, Kc, Q11, Q21, L1, L2);
         
         %% Finding Joint Space Stiffness matrix [2 * 2]
-        Kd_sym = muscleTensionStiffness(A_sym, Tension);
-        Kd = subs(Kd_sym, [Q1 Q2], [Q1 Q2]);
-        Kq = Kd - (A * Kc * A.');
+        Kd_sym = muscleTensionStiffness(A_sym, T);
+        %Kd = subs(Kd_sym, [Q1 Q2 L1 L2 Tension], [Q1 Q2 L1 L2 Tension]);
+        %Kq = Kd - (A * Kc * A.');
         
         %% Finding Task Space Stiffness Matrix [2 * 2]
         %Kx = taskStiffness();
