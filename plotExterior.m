@@ -1,4 +1,4 @@
-function [] = plotExterior(L1, L2, Q1, Q2, CENTER, RADIUS_PATH, M)
+function [] = plotExterior(L1, L2, Q1, Q2, CENTER, RADIUS_PATH, M, filename, theta)
 %PLOTPOINTS This function is used to plot the TaskSpace, links and the selected point.
 
 %% Figure Properties
@@ -7,8 +7,8 @@ viscircles(CENTER, 0.1, 'Color',"black", "LineWidth", 3);
 hold on;
 
 % Fix the axis limits.
-xlim([-2 4]);
-ylim([-2 4]);
+xlim([-6 6]);
+ylim([-6 6]);
 
 xlabel("X Axis");
 ylabel("Y Axis");
@@ -17,13 +17,13 @@ ylabel("Y Axis");
 axis square;
 
 % Set the grid on
-grid on;
+%grid on;
 
 % Set a title.
 title("Ellipsoid of Two Link SCM - 1 Redundancy");
 
 % Final Path of the end-point
-viscircles([1.25,0], RADIUS_PATH, 'Color', "red", "LineWidth", 1);
+viscircles([1.25,0], RADIUS_PATH, 'Color', "black", "LineWidth", 1);
 
 %% Computing the initial and end points for links
 % Link 1: Point 1 and Point 2
@@ -48,12 +48,21 @@ line([L2P1(1), L2P2(1)], [L2P1(2), L2P2(2)], "Color", "green", "LineWidth", 2);
 viscircles(L2P2, 0.1, 'Color',"black", "LineWidth", 3);
 
 %% Plotting the Cables
-
+%{
 % Cable 1 to end-effector
 line([M(1, 1), L2P2(1)], [M(1, 2), L2P2(2)], "Color", "cyan", "LineWidth", 1);
 % Cable 2 to end of link 1
 line([M(2, 1), L2P1(1)], [M(2, 2), L2P1(2)], "Color", "cyan", "LineWidth", 1);
 % Cable 3 to end-effector
 line([M(3, 1), L2P2(1)], [M(3, 2), L2P2(2)], "Color", "cyan", "LineWidth", 1);
+%}
 
+frame = getframe(1);
+im = frame2im(frame);
+[imind,cm] = rgb2ind(im,256);
+if theta == 1
+    imwrite(imind,cm,filename, 'gif', 'Loopcount',inf);
+else
+    imwrite(imind,cm,filename,'gif','WriteMode','append');
+end
 end

@@ -33,6 +33,9 @@ Kc = diag([KC KC KC]);  % Stiffness Matrix
 n = 1; % number of times the circle is traversed
 Fext = [0; 0];
 
+% For GIF
+filename = 'EllipsoidPlotV3.gif';
+
 %% Find resting position cable length
 RESTING_CABLE_LENGTH = zeros(3, 1);
 
@@ -47,11 +50,11 @@ J_sym = getJacobian();
 
 %% Defining path of end-point and iterating through it
 for t=1:n
-    for theta=1:1
+    for theta=1:2:360
         x = RADIUS_OF_PATH * cosd(theta) + 1.25;
         y = RADIUS_OF_PATH * sind(theta);
-        %point = [x, y];
-        point = [1.95 0.25];
+        point = [x, y];
+        %point = [1.95 0.25];
         
         %% Finding joint angles using Inverse Kinematics
         % There are multiple values for Q1 and Q2
@@ -87,9 +90,7 @@ for t=1:n
         plotEllipse(eval(Kx), eval(Kq));
         
         %% Plotting links, cables and animation
-        plotExterior(L1, L2, Q11, Q21, CENTER, RADIUS_OF_PATH, M);
+        plotExterior(L1, L2, Q11, Q21, CENTER, RADIUS_OF_PATH, M, filename, theta);
         pause(0.001);
-        
-        legend("Task Space Stiffness Ellipse", "Joint Space Stiffness Ellipse", "Link1", "Link2")
     end
 end
