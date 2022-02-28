@@ -28,9 +28,10 @@ NUMBER_OF_CABLES = 3;
 M = [0 1; 0, 0.5; 0 -1];
 RESTING_CABLE_END_POINT = [2 0; 1 0; 2 0];
 RADIUS_OF_PATH = 0.75;
-KC = 1000;  % Stiffness of the cable
+KC = 1;  % Stiffness of the cable
 Kc = diag([KC KC KC]);  % Stiffness Matrix
 n = 1; % number of times the circle is traversed
+Fext = [0; 0];
 
 %% Find resting position cable length
 RESTING_CABLE_LENGTH = zeros(3, 1);
@@ -42,12 +43,15 @@ end
 %% Symbolic expression for structure Matrix and muscle tension stiffness
 A_sym = structureMatrixSym(M);
 
+J_sym = getJacobian();
+
 %% Defining path of end-point and iterating through it
 for t=1:n
-    for theta=0:10:360
+    for theta=1:1
         x = RADIUS_OF_PATH * cosd(theta) + 1.25;
         y = RADIUS_OF_PATH * sind(theta);
-        point = [x, y];
+        %point = [x, y];
+        point = [1.95 0.25];
         
         %% Finding joint angles using Inverse Kinematics
         % There are multiple values for Q1 and Q2
@@ -65,14 +69,27 @@ for t=1:n
         
         %% Finding Joint Space Stiffness matrix [2 * 2]
         Kd_sym = muscleTensionStiffness(A_sym, Tension);
-        Kd = subs(Kd_sym, [Q1 Q2], [Q1 Q2]);
+        Kd = eval(subs(Kd_sym, [Q1 Q2], [Q1 Q2]));
         Kq = Kd - (A * Kc * A.');
+        Kq(isinf(Kq)) = 0;
+        Kq(isnan(Kq)) = 0;
         
         %% Finding Task Space Stiffness Matrix [2 * 2]
-        %Kx = taskStiffness();
+        J = eval(eval(subs(J_sym, [Q1 Q2 L1 L2], [Q1 Q2 L1 L2])));
+        d2J = diffOfJacobian(L1, L2, Q1, Q2, Fext);
+        Jt = transpose(J);
+        Kx = inv(Jt) \ (Kq - (d2J)) * inv(J);
+        Kx(isinf(Kx)) = 0;
+        Kx(isnan(Kx)) = 0;
+        
+        %% Calculating the ellipsoid
+        %[V, D] = eig(Kx)
+        plotEllipse(eval(Kx), eval(Kq));
         
         %% Plotting links, cables and animation
         plotExterior(L1, L2, Q11, Q21, CENTER, RADIUS_OF_PATH, M);
         pause(0.001);
+        
+        legend("Task Space Stiffness Ellipse", "Joint Space Stiffness Ellipse", "Link1", "Link2")
     end
 end
